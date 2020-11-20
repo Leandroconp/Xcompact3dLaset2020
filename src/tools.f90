@@ -1703,7 +1703,7 @@ module probes
   implicit none
 
   integer, save :: FS
-  integer, save :: iprobes = 0, nprobes = 0
+  integer, save :: iprobes = 1, nprobes = 0
   integer, save, allocatable, dimension(:) :: rankprobes
   integer, save, allocatable, dimension(:) :: nxprobes, nyprobes, nzprobes
   character(len=200), save :: fileformat, filename
