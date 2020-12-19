@@ -7,17 +7,12 @@
   real(4) :: lx, ly, lz
   integer(4) :: nfiles, icrfile, file1, filen, ifile, dig1, dig2, dig3
   integer(4) :: i, j, k, nfil
-  character(100) :: a
   character(3) :: chits
 
-  write (*,*) 'file         - Incompact3D to ParaView'
-  read (*,*) a
   write (*,*) 'nx, ny, nz   - Incompact3D'
   read (*,*) nx, ny, nz
   write (*,*) 'lx, ly, lz   - Incompact3D'
   read (*,*) lx, ly, lz
-  write (*,*) 'n files, incr, intial, final, deltat'
-  read (*,*) nfiles, icrfile, file1, filen, dt
 
   ! mesh generation
 
@@ -64,65 +59,33 @@
  !   write(*,*) ifile, 'file'//chits
 
     write(nfil,'(/)')
-    write(nfil,*)'        <Grid Name="'//trim(a)//'" GridType="Uniform">'
+    write(nfil,*)'        <Grid Name="Re_stresses" GridType="Uniform">'
     write(nfil,*)'            <Topology Reference="/Xdmf/Domain/Topology[1]"/>'
     write(nfil,*)'            <Geometry Reference="/Xdmf/Domain/Geometry[1]"/>'
 
-    write(nfil,*)'            <Attribute Name="uxux" Center="Node">'
+    write(nfil,*)'            <Attribute Name="ul2mean" Center="Node">'
     write(nfil,*)'               <DataItem Format="Binary" '
     write(nfil,*)'                DataType="Float" Precision="8" Endian="little" Seek="4"'
     write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
-    write(nfil,*)'                  umean'
+    write(nfil,*)'                  ul2mz'
     write(nfil,*)'               </DataItem>'
     write(nfil,*)'            </Attribute>'
 
-    write(nfil,*)'            <Attribute Name="uyuy" Center="Node">'
+    write(nfil,*)'            <Attribute Name="vl2mean" Center="Node">'
     write(nfil,*)'               <DataItem Format="Binary" '
     write(nfil,*)'                DataType="Float" Precision="8" Endian="little" Seek="4"'
     write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
-    write(nfil,*)'                  uyuy'
+    write(nfil,*)'                  vl2mz'
     write(nfil,*)'               </DataItem>'
     write(nfil,*)'            </Attribute>'
 
-    write(nfil,*)'            <Attribute Name="uxuy" Center="Node">'
+    write(nfil,*)'            <Attribute Name="ulvlmean" Center="Node">'
     write(nfil,*)'               <DataItem Format="Binary" '
     write(nfil,*)'                DataType="Float" Precision="8" Endian="little" Seek="4"'
     write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
-    write(nfil,*)'                  uxuy'
+    write(nfil,*)'                  ulvlmz'
     write(nfil,*)'               </DataItem>'
     write(nfil,*)'            </Attribute>'
-
-!    write(nfil,*)'            <Attribute Name="uzuz" Center="Node">'
-!    write(nfil,*)'               <DataItem Format="Binary" '
-!    write(nfil,*)'                DataType="Float" Precision="4" Endian="little" Seek="4"'
-!    write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
-!    write(nfil,*)'                  uxux'
-!    write(nfil,*)'               </DataItem>'
-!    write(nfil,*)'            </Attribute>'
-
-!    write(nfil,*)'            <Attribute Name="phi3s" Center="Node">'
-!    write(nfil,*)'               <DataItem Format="Binary" '
-!    write(nfil,*)'                DataType="Float" Precision="4" Endian="little" Seek="4"'
-!    write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
-!    write(nfil,*)'                  phi3s'//chits
-!    write(nfil,*)'               </DataItem>'
-!    write(nfil,*)'            </Attribute>'
-!
-!    write(nfil,*)'            <Attribute Name="phi4s" Center="Node">'
-!    write(nfil,*)'               <DataItem Format="Binary" '
-!    write(nfil,*)'                DataType="Float" Precision="4" Endian="little" Seek="4"'
-!    write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
-!    write(nfil,*)'                  phi4s'//chits
-!    write(nfil,*)'               </DataItem>'
-!    write(nfil,*)'            </Attribute>'
-!
-!    write(nfil,*)'            <Attribute Name="vort" Center="Node">'
-!    write(nfil,*)'               <DataItem Format="Binary" '
-!    write(nfil,*)'                DataType="Float" Precision="4" Endian="little" Seek="4"'
-!    write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
-!    write(nfil,*)'                  vort'//chits
-!    write(nfil,*)'               </DataItem>'
-!    write(nfil,*)'            </Attribute>'
 
     write(nfil,*)'        </Grid>'
 

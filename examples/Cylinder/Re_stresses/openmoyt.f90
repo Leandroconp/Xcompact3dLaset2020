@@ -5,23 +5,92 @@
       
       integer,parameter :: nx=81,ny=61,nz=16
       real(4) :: ntime
-      real*8 ,dimension(nx,ny,nz) :: umean
-      real(4),dimension(nx,ny) :: uxux,uyuy,uxuy
-      integer :: i,j
+      real*8 ,dimension(nx,ny,nz) :: umean, vmean, uumean, vvmean,&
+                                     uvmean
+      real*8 ,dimension(nx,ny,nz) :: ul2mean, vl2mean, ulvlmean
+      real*8 ,dimension(nx,ny) :: ul2mz, vl2mz, ulvlmz
+      integer :: i,j,k
+      character(6) :: chits
 
-      ntime=45000.
+      write (*,*) 'file number - Xcompact3D to ParaView'
+      read (*,*) chits
+      write (*,*) 'Time interval'
+      read (*,*) ntime
 
-      open(10,file='../umean.dat0120000', FORM='UNFORMATTED',&
+
+      open(10,file='../umean.dat0'//chits, FORM='UNFORMATTED',&
           access='stream')
       read(10) umean
       close(10)
+      open(10,file='../vmean.dat0'//chits, FORM='UNFORMATTED',&
+          access='stream')
+      read(10) vmean
+      close(10)
+      open(10,file='../uumean.dat0'//chits, FORM='UNFORMATTED',&
+          access='stream')
+      read(10) uumean
+      close(10)
+      open(10,file='../vvmean.dat0'//chits, FORM='UNFORMATTED',&
+          access='stream')
+      read(10) vvmean
+      close(10)
 
-      open(11,file='umean',form='unformatted',status='unknown')
-      write(11) umean
+      umean = umean/ntime
+      vmean = vmean/ntime
+      uumean = uumean/ntime
+      vvmean = vvmean/ntime
+      ul2mean = uumean - umean*umean
+      vl2mean = vvmean - vmean*vmean
+      ulvlmean = uvmean - umean*vmean
+
+      do k=1,nz
+        do j=1,(ny-1)/2
+          do i=1,nx
+           ul2mean(i,j,k) = 0.5*(ul2mean(i,j,k)+ul2mean(i,ny-j+1,k))
+           vl2mean(i,j,k) = 0.5*(vl2mean(i,j,k)+vl2mean(i,ny-j+1,k))
+           ulvlmean(i,j,k) = 0.5*(ulvlmean(i,j,k)-ulvlmean(i,ny-j+1,k))
+          enddo
+        enddo
+      enddo
+
+      do k=1,nz
+        do j=(ny-1)/2+2,ny
+          do i=1,nx
+             ul2mean(i,j,k) = ul2mean(i,ny-j+1,k)
+             vl2mean(i,j,k) = vl2mean(i,ny-j+1,k)
+             ulvlmean(i,j,k) = -ulvlmean(i,ny-j+1,k)
+          enddo
+        enddo
+      enddo
+
+      do k=1,nz
+        do i=1,nx
+           j=(ny-1)/2+1
+           ul2mean(i,j,k) = 0.5*(ul2mean(i,j-1,k)+ul2mean(i,j+1,k))
+           vl2mean(i,j,k) = 0.5*(vl2mean(i,j-1,k)+vl2mean(i,j+1,k))
+           ulvlmean(i,j,k) = 0.5*(vl2mean(i,j-1,k)+vl2mean(i,j+1,k))
+        enddo
+      enddo
+
+      do i=1,nx
+        do j=1,ny
+          ul2mz(i,j) = sum(ul2mean(i,j,:))/nz
+          vl2mz(i,j) = sum(vl2mean(i,j,:))/nz
+          ulvlmz(i,j) = sum(ulvlmean(i,j,:))/nz
+        enddo
+      enddo  
+
+      open(11,file='ul2mz',form='unformatted',status='unknown')
+      write(11) ul2mz
+      close(11)
+      open(11,file='vl2mz',form='unformatted',status='unknown')
+      write(11) vl2mz
+      close(11)
+      open(11,file='ulvlmz',form='unformatted',status='unknown')
+      write(11) ulvlmz
       close(11)
 
-      print *, umean(1:10,1:10,8)
-      
+
 !      ul2=ul2/(ntime*nz)
 !      vl2=vl2/(ntime*nz)
 !      ulul=ulul/(ntime*nz)
