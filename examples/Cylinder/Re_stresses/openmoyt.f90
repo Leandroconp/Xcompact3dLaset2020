@@ -1,7 +1,7 @@
       program openmoyt
 
       implicit none
-      
+      ! When big data compile as: gfortran -mcmodel=medium openmoyt.f90      
       
       integer,parameter :: nx=81,ny=61,nz=16
       real(4) :: ntime
