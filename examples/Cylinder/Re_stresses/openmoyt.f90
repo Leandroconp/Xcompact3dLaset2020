@@ -1,9 +1,9 @@
       program openmoyt
 
       implicit none
-      ! When big data compile as: gfortran -mcmodel=medium openmoyt.f90      
+      ! When big data compile as: gfortran -mcmodel=medium openmoyt.f90
       
-      integer,parameter :: nx=81,ny=61,nz=16
+      integer,parameter :: nx=801,ny=769,nz=128
       real(4) :: ntime
       real*8 ,dimension(nx,ny,nz) :: umean, vmean, uumean, vvmean,&
                                      uvmean
@@ -34,14 +34,20 @@
           access='stream')
       read(10) vvmean
       close(10)
+      open(10,file='../uvmean.dat0'//chits, FORM='UNFORMATTED',&
+          access='stream')
+      read(10) uvmean
+      close(10)
 
       umean = umean/ntime
       vmean = vmean/ntime
       uumean = uumean/ntime
       vvmean = vvmean/ntime
-      ul2mean = uumean - umean*umean
-      vl2mean = vvmean - vmean*vmean
-      ulvlmean = uvmean - umean*vmean
+      uvmean = uvmean/ntime
+
+      ul2mean(:,:,:) = uumean(:,:,:) - umean(:,:,:)*umean(:,:,:)
+      vl2mean(:,:,:) = vvmean(:,:,:) - vmean(:,:,:)*vmean(:,:,:)
+      ulvlmean(:,:,:) = uvmean(:,:,:) - umean(:,:,:)*vmean(:,:,:)
 
       do k=1,nz
         do j=1,(ny-1)/2
@@ -68,7 +74,7 @@
            j=(ny-1)/2+1
            ul2mean(i,j,k) = 0.5*(ul2mean(i,j-1,k)+ul2mean(i,j+1,k))
            vl2mean(i,j,k) = 0.5*(vl2mean(i,j-1,k)+vl2mean(i,j+1,k))
-           ulvlmean(i,j,k) = 0.5*(vl2mean(i,j-1,k)+vl2mean(i,j+1,k))
+           ulvlmean(i,j,k) = 0.5*(ulvlmean(i,j-1,k)+ulvlmean(i,j+1,k))
         enddo
       enddo
 
@@ -87,6 +93,15 @@
       write(11) vl2mz
       close(11)
       open(11,file='ulvlmz',form='unformatted',status='unknown')
+      write(11) ulvlmz
+      close(11)
+      open(11,file='ul2mz2',form='unformatted',status='unknown')
+      write(11) ul2mz
+      close(11)
+      open(11,file='vl2mz2',form='unformatted',status='unknown')
+      write(11) vl2mz
+      close(11)
+      open(11,file='ulvlmz2',form='unformatted',status='unknown')
       write(11) ulvlmz
       close(11)
 

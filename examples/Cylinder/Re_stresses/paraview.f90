@@ -87,6 +87,30 @@
     write(nfil,*)'               </DataItem>'
     write(nfil,*)'            </Attribute>'
 
+    write(nfil,*)'            <Attribute Name="ul2mean2" Center="Node">'
+    write(nfil,*)'               <DataItem Format="Binary" '
+    write(nfil,*)'                DataType="Float" Precision="8" Endian="little" Seek="4"'
+    write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
+    write(nfil,*)'                  ul2mz'
+    write(nfil,*)'               </DataItem>'
+    write(nfil,*)'            </Attribute>'
+
+    write(nfil,*)'            <Attribute Name="vl2mean2" Center="Node">'
+    write(nfil,*)'               <DataItem Format="Binary" '
+    write(nfil,*)'                DataType="Float" Precision="8" Endian="little" Seek="4"'
+    write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
+    write(nfil,*)'                  vl2mz'
+    write(nfil,*)'               </DataItem>'
+    write(nfil,*)'            </Attribute>'
+
+    write(nfil,*)'            <Attribute Name="ulvlmean2" Center="Node">'
+    write(nfil,*)'               <DataItem Format="Binary" '
+    write(nfil,*)'                DataType="Float" Precision="8" Endian="little" Seek="4"'
+    write(nfil,*)'                Dimensions="',nz,ny,nx,'">'
+    write(nfil,*)'                  ulvlmz'
+    write(nfil,*)'               </DataItem>'
+    write(nfil,*)'            </Attribute>'
+
     write(nfil,*)'        </Grid>'
 
  ! enddo
