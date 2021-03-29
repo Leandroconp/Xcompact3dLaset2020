@@ -48,7 +48,7 @@ ilast =  90000     ! Last iteration
 ! Enable modelling tools
 ilesmod=1            ! if 0 then DNS
 iscalar=0             ! If iscalar=0 (no scalar), if iscalar=1 (scalar)
-iibm=1                ! Flag for immersed boundary method
+iibm=1                ! Flag for immersed boundary method 0 - no ibm, 1 - direct forcing, 2 - polinomial lagrangean
 
 /End
 

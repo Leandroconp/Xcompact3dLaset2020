@@ -1,0 +1,55 @@
+#'
+# INCOMPACT 3D Flow parameters 
+#
+20.    # Lx 
+18.    # Ly 
+6.     # Lz 
+1000.    # Reynolds number
+1.0    # u1 (max velocity) 
+1.0    # u2 (min velocity) 
+0.     # Turbulence intensity (1=100%)
+0.002  # Time step
+#
+# INCOMPACT3D Flow configuration
+#
+2      # nclx
+1      # ncly 
+0      # nclz
+1      # Type of flow (iecoule) 
+1      # Inflow condition (1: classic, 2: turbinit)
+1      # First iteration (idebut)  
+200000  # Last iteration (ifin)
+1      # Temporal scheme (1:AB2, 2: RK3, 3:RK4)
+0      # y mesh refinement (0:nonen, 1:center, 2:both sides, 3:bottom)
+2.5    # Refinement parameter (beta) 
+2      # iswap (1=config 0/1/2 + 0 + 0; 2=others)
+1      # iskew (0:urotu, 1:skew)
+1      # ifiltre (0:pas de filtre, 1:filtre)
+#
+# INCOMPACT 3D File parameters 
+#
+data         # Relative data path
+0            # Read initial flow field ?
+sauve        # Name of initial flow field
+1            # Index of first backup file  
+500          # Iteration between backup (multiplo de 10)
+pouet        # Prefix of backup files
+condnor.dat  # Name of temporel inflow condition
+20960        # Index of first inflow condition (icommence)
+condnor.dat  # Name of turbinit file
+#
+# INCOMPACT 3D Body forces 
+#
+1      # Immersed Boundary Methods?
+8.     # X-centre position
+9.     # Y-centre position
+0.     # Z-centre position
+0.5    # Radius
+#
+# FORCED MOVEMENT CYLINDER
+#
+0      # Simulation with moving boundaries ? (yes=1,no=0)
+0.0    # X - amplitude
+0.0    # Y - amplitude
+0.0  # frequency
+
