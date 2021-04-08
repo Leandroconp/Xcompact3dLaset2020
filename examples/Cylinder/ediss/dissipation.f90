@@ -12,21 +12,25 @@
 USE param
 USE parfiX;USE parfiY;USE parfiZ
 USE derivX;USE derivY;USE derivZ
+USE IBM
 
 implicit none
 
 integer,parameter :: nx=801,ny=769,nz=128
 integer,parameter :: nxm=nx-1,nym=ny-1,nzm=nz
-integer,parameter :: interval=5000.
+integer,parameter :: interval=5000, pvirt=100
 real(8),dimension(nx,ny,nz) :: uxf,uyf,uzf,diss1
 real(8),dimension(nx,ny,nz) :: sy1,di1,di2,sz1,sy2,sy3,sy4,sy5,sy6,sy7,sy8,sy9,di11
 real(8),dimension(nx,nz) :: sy
-real(8),dimension(nx,ny) :: sz
+real(8),dimension(nx,ny) :: sz, uxm,uym,uzm
 real(8),dimension(ny,nz):: sx
-integer :: nxyz1,ijk,i,nfil,j,k,l,m
+integer :: nxyz1,ijk,i,nfil,j,k,l,m,ii1,jj1,ii2,jj2,ii3,jj3,ii4,jj4
 integer(4) :: nfiles, icrfile, file1, filen, ifile, dig1, dig2, dig3, dig4, dig5, dig6, dig7, dig8, dig9
 character(9) :: chits
 real(8), dimension(3,3,nx,ny,nz) :: A
+real(8) :: zeta, zcoord, etax, etay
+real(8), dimension(pvirt) :: zetax, zetay, ediss, efrontx, efronty
+real(8), dimension(4) :: weight
 
 !###1D###################################################################################
 real(8),allocatable,dimension(:) :: zkz,zk2,ezs
@@ -145,8 +149,29 @@ do ifile = file1, filen, interval
           access='stream')
      read(10) uzf
      close(10)
+
+
+     print *,'Calculating fluctuating velocities' 
+     ! Flutuating velocities
+     do i=1,nx
+        do j=1,ny
+             uxm(i,j) = sum(uxf(i,j,:))/nz
+             uym(i,j) = sum(uyf(i,j,:))/nz    
+             uzm(i,j) = sum(uzf(i,j,:))/nz
+        enddo
+     enddo
      
-  
+     do i=1,nx
+        do j=1,ny
+           do k=1,nz
+              uxf(i,j,k) = uxf(i,j,k) - uxm(i,j)
+              uyf(i,j,k) = uxf(i,j,k) - uxm(i,j)
+              uzf(i,j,k) = uxf(i,j,k) - uxm(i,j)
+           enddo
+        enddo
+     enddo
+
+
      ! Derivatives
      print *, 'Calculate derivatives'
      call derx (sy1,uxf,di1,sx,ffxp,fsxp,fwxp,nx,ny,nz,1) !dudx
@@ -159,9 +184,9 @@ do ifile = file1, filen, interval
      call derz (sy8,uyf,di11,sz,ffz,fsz,fwz,nx,ny,nz,0) !dvdz
      call derz (sy9,uzf,di11,sz,ffz,fsz,fwz,nx,ny,nz,0) !dwdz
 
-     !INSTANTANEOUS DISSIPATION RATE
-    diss1=0.0
-    A(:,:,:,:,:)=0.0
+    !INSTANTANEOUS DISSIPATION RATE
+    diss1=0.0D0
+    A(:,:,:,:,:)=0.0D0
     A(1,1,:,:,:)=sy1(:,:,:) !du/dx=sy1
     A(2,1,:,:,:)=sy2(:,:,:) !dv/dx=sy2
     A(3,1,:,:,:)=sy3(:,:,:) !dw/dx=tc1
@@ -171,19 +196,42 @@ do ifile = file1, filen, interval
     A(1,3,:,:,:)=sy7(:,:,:) !du/dz=tg1
     A(2,3,:,:,:)=sy8(:,:,:) !dv/dz=th1
     A(3,3,:,:,:)=sy9(:,:,:) !dw/dz=ti1
+     
+   !  do k=1,nz
+   !    do j=1,ny
+   !       do i=1,nx
+   !          diss1(i,j,k)=uxf(i,j,k)
+   !       enddo
+   !    enddo
+   !  enddo
 
-    do k=1,nz
-       do j=1,ny
-          do i=1,nx
-             do m=1,3
-                do l=1,3
-                        diss1(i,j,k)=diss1(i,j,k)+2.*xnu*0.5*0.5*(A(l,m,i,j,k)+A(m,l,i,j,k))**2.0
-                enddo
-             enddo
-          enddo
-       enddo
-    enddo
 
+
+    ! Local dissipation rate of kinetic energy for three-dimensional case
+  !  do k=1,nz
+  !     do j=1,ny
+  !        do i=1,nx
+  !           do m=1,3
+  !              do l=1,3
+  !                      diss1(i,j,k)=diss1(i,j,k)+2.*xnu*0.5*0.5*(A(l,m,i,j,k)+A(m,l,i,j,k))**2.0
+  !              enddo
+  !           enddo
+  !        enddo
+  !     enddo
+  !  enddo
+
+   ! Local dissipation rate of kinetic energy for homogeneous turbulence
+   do k=1,nz
+      do j=1,ny
+         do i=1,nx
+            do m=1,3
+               do l=1,3
+                       diss1(i,j,k)=diss1(i,j,k)+xnu*A(l,m,i,j,k)**2.0D0
+               enddo
+            enddo
+         enddo
+      enddo
+   enddo
      
      print *, 'Saving dissipation rate energy '
      open(11,file='ediss'//chits,form='unformatted',status='unknown')
@@ -205,6 +253,58 @@ do ifile = file1, filen, interval
      write(nfil,*)'            </Attribute>'
 
      write(nfil,*)'        </Grid>'
+
+
+     ! Interpolation of dissipation rate energy to the cylinder surface
+     ediss(:) = 0.0D0
+     do k=1,nz
+        zcoord=(k)*dz
+        do i=1,pvirt
+           zeta = 2.0D0*i*acos(-1.0)/pvirt
+           zetax(i) = cex + 0.5D0*cos(zeta)
+           zetay(i) = cey + 0.5D0*sin(zeta)
+
+           etax=zetax(i)/dx - floor(zetax(i)/dx)
+           etay=zetay(i)/dy - floor(zetay(i)/dy)
+
+           ! Coordinate system
+           ii1=floor(zetax(i)/dx)+1
+           jj1=floor(zetay(i)/dy)+1
+           ii2=ii1+1
+           jj2=jj1
+           ii3=ii1
+           jj3=jj1+1
+           ii4=ii1+1
+           jj4=jj1+1
+
+           ! Weights to compose the dissipation rate at the surface cylinder
+           weight(1) = (1-etax)*(1-etay)
+           weight(2) = etax*(1-etay)
+           weight(3) = (1-etax)*etay
+           weight(4) = etax*etay
+
+           ! Interpolation of Ediss to the surface cylinder
+           ediss(i) = ediss(i) + diss1(ii1,jj1,k)*weight(1) + diss1(ii2,jj2,k)*weight(2) + diss1(ii3,jj3,k)*weight(3)+&
+                   diss1(ii4,jj4,k)*weight(4)
+           
+        enddo
+     enddo
+     
+     
+     open(1,file='output'//chits//'.txt')
+     do i=1,pvirt
+        ediss(i)=ediss(i)/nz
+        zeta = 2.0D0*i*acos(-1.0D0)/pvirt
+        zetax(i) = cex + 0.5D0*cos(zeta)
+        zetay(i) = cey + 0.5D0*sin(zeta)
+        ! Matlab parameters for use quiver function
+        efrontx(i) = ediss(i)*cos(zeta)
+        efronty(i) = ediss(i)*sin(zeta)
+        write(1,2) zetax(i),zetay(i),efrontx(i),efronty(i)
+     enddo
+     close(1)
+     2 format (4F8.3)
+
 
 enddo
 write(nfil,'(/)')

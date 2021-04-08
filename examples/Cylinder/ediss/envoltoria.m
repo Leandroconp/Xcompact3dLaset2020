@@ -3,24 +3,15 @@ function envoltoria
 clc
 clear
 
-% deslocamento do cilindro
-AD = ('../../dados/aerof/');
-DA = ('../../press_contour/envoltoria');
-cd(AD);
-aerof=load('aerof0000002');
-%cont=49997; step=500; temp=aerof(cont,2);
-cont=60942; step=500; temp=aerof(cont,2);
-%initial=cont; % Início da trajetória
-initial=cont-10945; % Início da trajetória
-xcil=aerof(:,3); ycil=aerof(:,4);
-pz=32;
+ediss=load('output.txt');
+
+quiver(ediss(:,1),ediss(:,2),ediss(:,3),ediss(:,4),'k','MaxHeadSize',0.1...
+       'LineWidth', 1.0)
+axis([7 9 8 10]);
+axis equal tight;
+axis([7 9 8 10]);
+
 N = length(dir)
-file2=dir;
-fname=file2(pz+2).name;
-aerof=load(fname);
-drag=aerof(:,9);
-lift=aerof(:,10);
-cd(DA);
 
 nleft=3;
 nright=3;

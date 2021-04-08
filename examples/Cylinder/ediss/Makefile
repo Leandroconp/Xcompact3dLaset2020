@@ -14,3 +14,12 @@ derive.o : derive.f90
 	$(FC)  $(OPTFC) -c derive.f90
 parametre.o : parametre.f90
 	$(FC)  $(OPTFC) -c parametre.f90
+
+.PHONY: clean
+clean: 
+	rm -f *.o *.mod ediss
+
+.PHONY: cleanall
+cleanall: clean
+	rm -f *~ *.o *.mod *.txt *.xdmf core ediss* 
+
