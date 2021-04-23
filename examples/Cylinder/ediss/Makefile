@@ -17,7 +17,7 @@ parametre.o : parametre.f90
 
 .PHONY: clean
 clean: 
-	rm -f *.o *.mod ediss
+	rm -f *.o *.mod *.txt ediss
 
 .PHONY: cleanall
 cleanall: clean
