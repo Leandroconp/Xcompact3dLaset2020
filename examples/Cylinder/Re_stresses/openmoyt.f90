@@ -1,10 +1,12 @@
       program openmoyt
 
       implicit none
-      ! When big data compile as: gfortran -mcmodel=medium openmoyt.f90
       
-      integer,parameter :: nx=801,ny=769,nz=128
-      real(4) :: ntime
+      
+      integer,parameter :: nx=201,ny=193,nz=32
+      real(8),parameter :: xlx=20.,yly=18.,zlz=6.
+      real(8) :: ntime, maxlengthul2, maxlengthvl2, maxlengthulvl
+      real(8) :: loc1ul2, loc2ul2, loc1vl2, loc2vl2, loc1ulvl, loc2ulvl, dx, dy
       real*8 ,dimension(nx,ny,nz) :: umean, vmean, uumean, vvmean,&
                                      uvmean
       real*8 ,dimension(nx,ny,nz) :: ul2mean, vl2mean, ulvlmean
@@ -17,6 +19,8 @@
       write (*,*) 'Time interval'
       read (*,*) ntime
 
+      dx = xlx/real((nx-1),8)
+      dy = yly/real((ny-1),8)
 
       open(10,file='../umean.dat0'//chits, FORM='UNFORMATTED',&
           access='stream')
@@ -77,15 +81,42 @@
            ulvlmean(i,j,k) = 0.5*(ulvlmean(i,j-1,k)+ulvlmean(i,j+1,k))
         enddo
       enddo
-
+      
+      !Calculate the z average and the length formation
+      maxlengthul2=0.0D0; maxlengthvl2=0.0D0; maxlengthulvl=0.0D0
       do i=1,nx
         do j=1,ny
           ul2mz(i,j) = sum(ul2mean(i,j,:))/nz
           vl2mz(i,j) = sum(vl2mean(i,j,:))/nz
           ulvlmz(i,j) = sum(ulvlmean(i,j,:))/nz
+          if (ul2mz(i,j).gt.maxlengthul2) then   ! Length formation vortex
+            maxlengthul2=ul2mz(i,j)
+            loc1ul2=(i-1)*dx
+            loc2ul2=(j-1)*dy
+          endif
+          if (vl2mz(i,j).gt.maxlengthvl2) then   ! Length formation vortex
+            maxlengthvl2=vl2mz(i,j)
+            loc1vl2=(i-1)*dx
+            loc2vl2=(j-1)*dy
+          endif
+          if (ulvlmz(i,j).gt.maxlengthulvl) then   ! Length formation vortex
+            maxlengthulvl=ulvlmz(i,j)
+            loc1ulvl=(i-1)*dx
+            loc2ulvl=(j-1)*dy
+          endif
         enddo
-      enddo  
+      enddo 
 
+
+      open(3,file='Lful2-'//chits//'.txt') 
+      write(3,4) loc1ul2, loc2ul2, maxlengthul2
+      close(3)
+      open(3,file='Lfvl2-'//chits//'.txt') 
+      write(3,4) loc1vl2, loc2vl2, maxlengthvl2
+      close(3)
+      open(3,file='Lfulvl-'//chits//'.txt') 
+      write(3,4) loc1ulvl, loc2ulvl, maxlengthulvl
+      close(3)
       open(11,file='ul2mz',form='unformatted',status='unknown')
       write(11) ul2mz
       close(11)
@@ -156,6 +187,6 @@
 !      open(13,file='uxuy',form='unformatted',status='unknown')
 !      write(13) uxuy
 !      close(13)
-     
+      4 format (3F8.3) 
           
       end program openmoyt
