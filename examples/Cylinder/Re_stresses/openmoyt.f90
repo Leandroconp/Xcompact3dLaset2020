@@ -6,7 +6,8 @@
       integer,parameter :: nx=201,ny=193,nz=32
       real(8),parameter :: xlx=20.,yly=18.,zlz=6.
       real(8) :: ntime, maxlengthul2, maxlengthvl2, maxlengthulvl
-      real(8) :: loc1ul2, loc2ul2, loc1vl2, loc2vl2, loc1ulvl, loc2ulvl, dx, dy
+      real(8) :: loc1ul2, loc2ul2, loc1vl2, loc2vl2, loc1ulvl,loc2ulvl,&
+                 dx, dy
       real*8 ,dimension(nx,ny,nz) :: umean, vmean, uumean, vvmean,&
                                      uvmean
       real*8 ,dimension(nx,ny,nz) :: ul2mean, vl2mean, ulvlmean
